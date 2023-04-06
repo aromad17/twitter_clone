@@ -35,27 +35,32 @@ function Profiles({ userObj }) {
   }
 
   const onSubmit = async (e) => {
+
     e.preventDefault();
+
     let myPicUrl = "";
 
-    if (userObj.displayName !== newDisplayName) {
-      await updateProfile(authService.currentUser, {
+    try {
+
+      const storageRef = ref(storage, `${userObj.uid}/${uuidv4()}`);
+      const response = await uploadString(storageRef, myPic, 'data_url');
+      console.log("ewqewq->", response);
+      myPicUrl = await getDownloadURL(ref(storage, response.ref));
+
+      await updateProfile(userObj, {
         displayName: newDisplayName,
-        photoURL: myPicUrl,
+        photoURL: myPicUrl,//!== "" ? myPicUrl : userObj.photoURL,
       });
+
+    } catch (error) {
+      console.log("error")
     }
 
-
-    const storageRef = ref(storage, `${userObj.uid}/${uuidv4()}`);
-
-    const response = await uploadString(storageRef, myPic, 'data_url');
-    console.log("reponse->", response)
-
-
-    myPicUrl = await getDownloadURL(ref(storage, response.ref));
-    //http로 시작되는 주소 가져오기
-
+    setMyPic('');
+    setNewDisplayName('');
   }
+
+
   const onChange = (e) => {
     const { target: { value } } = e;
     setNewDisplayName(value)
@@ -76,12 +81,11 @@ function Profiles({ userObj }) {
 
   }
 
-
-
   return (
     <div className='container'>
       <form onSubmit={onSubmit} className='profileForm'>
 
+        <img src={userObj.photoURL} width={100} height={100} alt='' />
 
         <input type='submit' value='update profile' style={{ cursor: 'pointer' }} className='formInput' />
         <input type='text' onChange={onChange} value={newDisplayName} placeholder='Set Your Name' className='formBtn' />

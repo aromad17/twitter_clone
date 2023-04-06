@@ -44,7 +44,9 @@ function TweetInsert({ userObj }) {
         creatorId: userObj.uid, //userObj => 로그인한 사용자 정보
         attachmentUrl
       });
+
       // console.log("Document written with ID: ", docRef.id);
+
     } catch (e) {
       console.error("Error adding document: ", e);
     }

@@ -59,7 +59,7 @@ function Tweets(props) {
           <form className='container tweet_edit'>
             <img src={attachmentUrl} alt="" />
 
-            <input type="text" onChange={onChange} name="edit" value={editTweet} required className='formBtn' />
+            <input type="text" onChange={onChange} name="edit" value={editTweet} required />
 
             <input type='submit' value='edit confirm' onClick={onSubmit} className='formBtn' />
 

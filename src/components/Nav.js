@@ -19,10 +19,13 @@ function Nav({ userObj }) {
               {userObj.displayName ? `${userObj.displayName}'s Profile` : "Profile"}
             </span>
 
-            <img src="" alt='' />
+
           </Link>
+
         </li>
       </ul>
+
+
     </nav >
   )
 }
