@@ -1,19 +1,17 @@
-import React, { useState } from 'react'
-import { collection, addDoc } from "firebase/firestore";
+import React, { useEffect, useState } from 'react'
+import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { storage, db } from '../fbase';
+import Tweet from '../components/Tweets';
 import { v4 as uuidv4 } from 'uuid';
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import "../style/tweetinsert.scss"
+import { ref, uploadString, getDownloadURL, deleteObject } from "firebase/storage";
+import TweetInsert from '../../src/components/TweetInsert';
 
 
-function TweetInsert({ userObj }) {
+function Home({ userObj }) {
 
-
-  const [attachment, setAttachment] = useState('');
   const [tweet, setTweet] = useState('');
-
-
+  const [tweets, setTweets] = useState([]);
+  const [attachment, setAttachment] = useState('');
 
   const onChange = (e) => {
     const { target: { value } } = e;
@@ -21,6 +19,34 @@ function TweetInsert({ userObj }) {
 
     // console.log(tweet);
   }
+
+  // const getTweets = async (e) => {
+  //   const querySnapshot = await getDocs(collection(db, "newTweet"));
+  //   querySnapshot.forEach((doc) => {
+  //     // console.log(`${doc.id} => ${doc.data()}`);
+  //     const tweetObject = { ...doc.data(), id: doc.id }
+  //     setTweets(prev => [tweetObject, ...prev]);//새 트윗을 가장 위로 보내기
+  //     //ex) ary[1,2,3,4,5,] => 새트윗 작성후 : [tweetObject,1,2,3,4,5]
+
+  //   });
+
+  // }
+
+  useEffect(() => {
+    const q = query(collection(db, "newTweet"), orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const newArray = [];
+      querySnapshot.forEach((doc) => {
+        newArray.push({ ...doc.data(), id: doc.id });
+      });
+
+      setTweets(newArray);
+    });
+
+
+  }, []);
+
 
 
   const onSubmit = async (e) => {
@@ -71,46 +97,34 @@ function TweetInsert({ userObj }) {
     }
   }
 
-
   const onClearAttachment = () => {
     setAttachment('');
   }
 
 
-
-
   return (
-    <form onSubmit={onSubmit} className='InsertForm'>
-      <div className='InsertInput__container'>
-        <input type='text' placeholder='What you gonna do?' maxLength={120} onChange={onChange} value={tweet} className='InsertInput__input' />
-        <input type='submit' value='&rarr;' className='InsertInput__arrow' onClick={onSubmit} />
-      </div>
+    <>
 
-      <label htmlFor="attach-file" className='InsertInput__label'>
-        <span>Add Photos</span>
-        <FontAwesomeIcon icon="fa-solid fa-plus" />
-      </label>
-      <input id="attach-file" type='file' accept='image/*' onChange={onFileChange} className='InsertInput__input' style={{ opacity: 0 }} />
-
-      {attachment && ( //attachment 에 값이 있다면 true , undefiend,null,공백은 false 값이 있다면 true
-
-        <div className='Insertform_attachment'>
-          <img src={attachment} style={{ backgroundImage: attachment }} alt="으애" />
-          <div className='Insertform__clear' onClick={onClearAttachment}>
-            <span>Remove</span>
-            <FontAwesomeIcon icon="fa-solid fa-xmark" />
-          </div>
+      <TweetInsert userObj={userObj} />
 
 
+      {tweets.map((tweet, idx) => (
+        // <div key={tweet.id}>
+        //   <h4>
+        //     {tweet.text}
+        //   </h4>
+        // </div>
 
-        </div>
-      )
+        <Tweet
+          key={idx}
+          tweetObj={tweet}
+          isOwner={tweet.creatorId === userObj.uid}
+        />
 
-      }
+      ))}
 
-
-    </form>
+    </>
   )
 }
 
-export default TweetInsert
+export default Home
