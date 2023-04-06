@@ -11,7 +11,7 @@ function AppRouter({ isLoggedIn, userObj }) {
 
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       {isLoggedIn && <Nav userObj={userObj} />}
       <Routes>
         {isLoggedIn ? (
