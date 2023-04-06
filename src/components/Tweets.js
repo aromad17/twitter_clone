@@ -57,7 +57,8 @@ function Tweets(props) {
       {editing ? (
         <>
           <form className='container tweet_edit'>
-            <img src={attachmentUrl} alt="" />
+            {attachmentUrl ? <img src={attachmentUrl} alt="" /> : <></>}
+
 
             <input type="text" onChange={onChange} name="edit" value={editTweet} required />
 
@@ -69,8 +70,8 @@ function Tweets(props) {
       ) : (
         <>
           {text ? <h4>{text}</h4> : <h4>&nbsp;</h4>}
-          {attachmentUrl &&
-            <img src={attachmentUrl} alt="" />
+          {attachmentUrl ?
+            <img src={attachmentUrl} alt="" /> : <></>
           }
           <span>{nowDate}</span>
 
