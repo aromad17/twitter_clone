@@ -60,7 +60,7 @@ function AuthForm() {
 
 
       <span onClick={toggleAccount} className='authSwitch'>
-        {newAccount ? "이미 계정이 있다면? 로그인으로 이동" : "계정이 없다면? 회원가입으로 이동"}
+        {newAccount ? "이미 계정이 있다면?로그인으로 이동" : "계정이 없다면?회원가입으로 이동"}
 
       </span>
     </>
