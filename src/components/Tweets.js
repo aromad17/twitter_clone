@@ -1,14 +1,15 @@
 import { deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { storage, db } from '../fbase';
 import { deleteObject, ref } from 'firebase/storage';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import "../style/tweet.scss"
 function Tweets(props) {
   console.log("props->", props);
   const { tweetObj, tweetObj: { text, key, createdAt, id, attachmentUrl }, isOwner } = props;
   const [editing, setEditing] = useState(false);
   const [editTweet, setEditTweet] = useState(text);
-
+  const [nowDate, setNowDate] = useState(createdAt);
 
   const onDeleteClick = async (e) => {
     const ok = window.confirm("삭제하시겠습니까?");
@@ -43,28 +44,46 @@ function Tweets(props) {
 
   // const onEditClick = (e) => { third }
 
+  useEffect(() => {
+    let timeStamp = createdAt;
+    const now = new Date(timeStamp);
+    setNowDate(now.toDateString());
+    //toDatetring()은 날짜만 나오고 toUTCString은 시간도 나옴
+
+
+  }, [])
+
   return (
-    <div key={key}>
+    <div className='tweet'>
       {editing ? (
         <>
-          <form>
-            <input type="text" onChange={onChange} name="edit" value={editTweet} required />
-            <input type='submit' value='edit confirm' onClick={onSubmit} />
+          <form className='container tweet_edit'>
+            <img src={attachmentUrl} alt="" />
+
+            <input type="text" onChange={onChange} name="edit" value={editTweet} required className='formBtn' />
+
+            <input type='submit' value='edit confirm' onClick={onSubmit} className='formBtn' />
+
           </form>
-          <button onClick={toggleEditing}>Cancel</button>
+          <button className='cancelBtn' onClick={toggleEditing}>Cancel</button>
         </>
       ) : (
         <>
           <h4>{text}</h4>
           {attachmentUrl &&
-            <img src={attachmentUrl} width="150" height="150" alt="" />
+            <img src={attachmentUrl} alt="" />
           }
-          <hr />
+          <span>{nowDate}</span>
+
           {isOwner && (
-            <>
-              <button onClick={onDeleteClick}>Delete Tweet</button>
-              <button onClick={toggleEditing}>Edit Tweet</button>
-            </>
+            <div className='tweet__actions'>
+              <span onClick={toggleEditing}>
+                <FontAwesomeIcon icon="fa-solid fa-pencil" />
+              </span>
+              <span onClick={onDeleteClick}>
+                <FontAwesomeIcon icon="fa-solid fa-trash" />
+              </span>
+            </div>
           )}
         </>
       )}

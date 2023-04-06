@@ -1,23 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
-import { storage, db } from '../fbase';
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { db } from '../fbase';
 import Tweet from '../components/Tweets';
-import { v4 as uuidv4 } from 'uuid';
-import { ref, uploadString, getDownloadURL, deleteObject } from "firebase/storage";
+import TweetInsert from '../components/TweetInsert';
 
 
 function Home({ userObj }) {
 
-  const [tweet, setTweet] = useState('');
   const [tweets, setTweets] = useState([]);
-  const [attachment, setAttachment] = useState('');
 
-  const onChange = (e) => {
-    const { target: { value } } = e;
-    setTweet(value);
 
-    // console.log(tweet);
-  }
 
   // const getTweets = async (e) => {
   //   const querySnapshot = await getDocs(collection(db, "newTweet"));
@@ -46,100 +38,28 @@ function Home({ userObj }) {
 
   }, []);
 
-
-
-  const onSubmit = async (e) => {
-
-    e.preventDefault();
-
-    try {
-      let attachmentUrl = "";
-
-      if (attachment !== "") {
-        const storageRef = ref(storage, `${userObj.uid}/${uuidv4()}`);
-        // ref(storage, '경로')
-        // `${userObj.uid}/${uuidv4()}` -> `${로그인한아이디}/${고유 아이디}`
-        const response = await uploadString(storageRef, attachment, 'data_url');
-        console.log('response->', response);
-        attachmentUrl = await getDownloadURL(ref(storage, response.ref));
-      }
-      const docRef = await addDoc(collection(db, "newTweet"), {
-        text: tweet,
-        createdAt: Date.now(),
-        creatorId: userObj.uid, //userObj => 로그인한 사용자 정보
-        attachmentUrl
-      });
-      // console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
-    setTweet('');
-    setAttachment('');
-  }
-
-  const onFileChange = (e) => {
-
-    console.log('e->', e);
-
-    const { target: { files } } = e;
-    const theFile = files[0];
-
-    const reader = new FileReader();
-    // 1. 사진을 보이게 하려면 FileReader()라는 브라우저 api 사용이 불가피함
-    reader.readAsDataURL(theFile);
-    // 2. theFile이라는 이미지객체의 데이터를 FileReader로 돌려 데이터 url로 추출해준다.
-    reader.onloadend = (finishedEvent) => {
-      console.log('finEnd ->', finishedEvent);
-      const { currentTarget: { result } } = finishedEvent;
-      setAttachment(result);
-      // 3.추출된 url을 finishedEvent 객체로 지정하고 setAttachment에 삽입
-    }
-  }
-
-
-  const onClearAttachment = () => {
-    setAttachment('');
-  }
-
-
   return (
-    <>
-      <form>
-        <input type='text' placeholder='What you gonna do?' onChange={onChange} value={tweet} />
-        <input type='file' accept='image/*' onChange={onFileChange} />
-        <input type='submit' value='tweet' onClick={onSubmit} />
+    <div className='container'>
+      <TweetInsert userObj={userObj} />
 
+      <div>
+        {tweets.map((tweet, idx) => (
+          // <div key={tweet.id}>
+          //   <h4>
+          //     {tweet.text}
+          //   </h4>
+          // </div>
 
-        {attachment && ( //attachment 에 값이 있다면 true , undefiend,null,공백은 false 값이 있다면 true
+          <Tweet
+            key={idx}
+            tweetObj={tweet}
+            isOwner={tweet.creatorId === userObj.uid}
+          />
 
-          <div>
-            <img src={attachment} width="200" height="200" alt="으애" />
-            <button onClick={onClearAttachment}>Remove</button>
-          </div>
-        )
-
-        }
-
-
-      </form>
-
-
-      {tweets.map((tweet, idx) => (
-        // <div key={tweet.id}>
-        //   <h4>
-        //     {tweet.text}
-        //   </h4>
-        // </div>
-
-        <Tweet
-          key={idx}
-          tweetObj={tweet}
-          isOwner={tweet.creatorId === userObj.uid}
-        />
-
-      ))}
-
-    </>
+        ))}
+      </div>
+      <footer>&copy; {new Date().getFullYear()}Twiiter app</footer>
+    </div>
   )
 }
 

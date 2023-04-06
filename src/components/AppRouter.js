@@ -12,7 +12,7 @@ function AppRouter({ isLoggedIn, userObj }) {
 
   return (
     <BrowserRouter>
-      {isLoggedIn && <Nav />}
+      {isLoggedIn && <Nav userObj={userObj} />}
       <Routes>
         {isLoggedIn ? (
           <>
